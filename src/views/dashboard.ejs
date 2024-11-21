@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Commerce Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="/styles/dashboard.css">
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <% products.forEach((product) => { %>
+        <div class="col-md-4 product-card">
+          <div class="card" style="width: 18rem;">
+            <img src="<%= product.imageURL %>" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title"><%= product.title %></h5>
+              <p class="card-text">
+                ₹<%= Number(product.currentPrice).toFixed(2) %><br>
+                <sub><s>MRP: ₹<%= Number(product.mrp).toFixed(2) %></s></sub>
+              </p>
+              <a href="#" class="btn btn-warning" onclick="editProduct('<%= JSON.stringify(product) %>')">Edit product</a>
+              <a href="#" class="btn btn-danger" onclick="deleteProduct('<%= product.id %>')">Delete product</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <hr>
+
+    <div class="form-container hidden" id="edit-form">
+      <h1 class="mb-3">Edit product</h1>
+      <form>
+        <div class="mb-3">
+          <label for="title" class="form-label">Title</label>
+          <input type="text" name="title" class="form-control" id="title" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="currentPrice" class="form-label">Price</label>
+          <input type="text" name="currentPrice" class="form-control" id="currentPrice" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="mrp" class="form-label">MRP</label>
+          <input type="text" name="mrp" class="form-control" id="mrp" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="imageURL" class="form-label">Image URL</label>
+          <input type="text" name="imageURL" class="form-control" id="imageURL" aria-describedby="emailHelp">
+        </div>
+        <button type="button" class="btn btn-primary" onclick="updateProduct()">Submit</button>
+      </form>
+    </div>
+
+    <div class="form-container" id="add-form">
+      <% if(errorMessage) { %>
+        <div class="alert alert-danger" role="alert">
+          <%= errorMessage %>
+        </div>
+      <% } %>
+      <h1 class="mb-3">Add new product</h1>
+      <form method="POST" action="/products">
+        <div class="mb-3">
+          <label for="title" class="form-label">Title</label>
+          <input type="text" name="title" class="form-control" id="title" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="currentPrice" class="form-label">Price</label>
+          <input type="text" name="currentPrice" class="form-control" id="currentPrice" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="mrp" class="form-label">MRP</label>
+          <input type="text" name="mrp" class="form-control" id="mrp" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="imageURL" class="form-label">Image URL</label>
+          <input type="text" name="imageURL" class="form-control" id="imageURL" aria-describedby="emailHelp">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+    let productId = null
+    function editProduct(product) {
+      let productJSON = JSON.parse(product)
+      productId = productJSON.id
+      document.getElementById('edit-form').classList.remove('hidden')
+      document.getElementById('add-form').classList.add('hidden')
+      
+      document.getElementById('title').value = productJSON.title
+      document.getElementById('currentPrice').value = productJSON.currentPrice
+      document.getElementById('mrp').value = productJSON.mrp
+      document.getElementById('imageURL').value = productJSON.imageURL
+    }
+
+    async function updateProduct() {
+      const title = document.getElementById('title').value
+      const currentPrice = document.getElementById('currentPrice').value
+      const mrp = document.getElementById('mrp').value
+      const imageURL = document.getElementById('imageURL').value
+
+      try {
+        await axios.patch(`/products/${productId}`, {
+          title,
+          currentPrice,
+          mrp,
+          imageURL
+        })
+        window.location.reload()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    async function deleteProduct(productId) {
+      try {
+        const isConfirmed = confirm('Are you sure you want to delete this product?')
+        if(!isConfirmed){
+          return
+        }
+        await axios.delete(`/products/${productId}`)
+        window.location.reload()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+.product-card {
+  margin-top: 2em;
+}
+
+.form-container {
+  width: 500px;
+  margin: auto;
+}
+
+.hidden {
+  display: none;
+}
